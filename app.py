@@ -10,6 +10,31 @@ from pdf_generator import generate_pdf_report
 
 st.set_page_config(page_title='Portfolio Analyzer', layout='wide', initial_sidebar_state='collapsed')
 
+def build_growth_chart(chart_data):
+    """Build a styled Plotly line chart for portfolio growth trajectory."""
+    colors = ['#1e3a8a', '#82ca9d', '#f59e0b']
+    fig = px.line(
+        chart_data,
+        labels={"value": "Growth Multiplier", "index": "Date", "variable": "Series"},
+        color_discrete_sequence=colors
+    )
+    fig.update_traces(line=dict(width=2.5))
+    fig.update_layout(
+        template='plotly_white',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        yaxis_title="Growth Multiplier (Starting at 1.0)",
+        xaxis_title="",
+        showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color='#4a5568')),
+        hovermode="x unified",
+        margin=dict(l=0, r=0, t=40, b=0),
+        font=dict(color='#4a5568')
+    )
+    fig.update_xaxes(showgrid=False, tickfont=dict(color='#4a5568'))
+    fig.update_yaxes(showgrid=False, tickformat=".1f", tickfont=dict(color='#4a5568'))
+    return fig
+
 # Initialize tutorial session state
 if 'tutorial_seen' not in st.session_state:
     st.session_state.tutorial_seen = False
@@ -37,12 +62,12 @@ with nav3:
 
 st.divider()
 
-# Pastel Design System CSS
+# Design System CSS
 st.markdown("""
 <style>
     /* Global background */
     .stApp {
-        background-color: #faf9f8;
+        background-color: #f8fafc;
     }
     
     /* Card containers */
@@ -91,6 +116,34 @@ st.markdown("""
         padding-bottom: 1rem;
     }
     
+    /* Tutorial styles */
+    .tutorial-step {
+        text-align: center;
+        padding: 1rem;
+    }
+    .tutorial-step-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .tutorial-step-title {
+        font-weight: 600;
+        color: #1e3a8a;
+        margin-bottom: 0.5rem;
+    }
+    .tutorial-step-desc {
+        color: #64748b;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    /* Investor summary */
+    .investor-summary {
+        color: #475569;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        padding: 0.5rem 0;
+    }
+    
     /* Mobile responsiveness */
     @media (max-width: 768px) {
         .block-container {
@@ -109,56 +162,17 @@ st.markdown("""
 # Onboarding Tutorial - Show only if not seen
 if not st.session_state.tutorial_seen:
     with st.container(border=True):
-        # Custom CSS for tutorial container
-        st.markdown("""
-        <style>
-        .tutorial-container {
-            background-color: #ffffff;
-            border: 2px solid #1e3a8a;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(30, 58, 138, 0.15);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        .tutorial-header {
-            text-align: center;
-            color: #1e3a8a;
-            margin-bottom: 2rem;
-        }
-        .tutorial-step {
-            text-align: center;
-            padding: 1rem;
-        }
-        .tutorial-step-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .tutorial-step-title {
-            font-weight: 600;
-            color: #1e3a8a;
-            margin-bottom: 0.5rem;
-        }
-        .tutorial-step-desc {
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+        st.markdown('## Welcome to the Portfolio Analyzer')
+        st.markdown('Get a complete picture of your portfolio in three simple steps.')
         
-        st.markdown('<div class="tutorial-container">', unsafe_allow_html=True)
-        
-        # Welcome header
-        st.markdown('<h2 class="tutorial-header">Welcome to the Portfolio Analyzer</h2>', unsafe_allow_html=True)
-        
-        # Three steps in columns
         step1, step2, step3 = st.columns(3)
         
         with step1:
             st.markdown("""
             <div class="tutorial-step">
                 <div class="tutorial-step-icon">📊</div>
-                <div class="tutorial-step-title">Step 1: Input Holdings</div>
-                <div class="tutorial-step-desc">Add your portfolio tickers and shares either by pasting text or uploading a CSV file.</div>
+                <div class="tutorial-step-title">Input Holdings</div>
+                <div class="tutorial-step-desc">Add your portfolio tickers and shares by pasting text or uploading a CSV file.</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -166,7 +180,7 @@ if not st.session_state.tutorial_seen:
             st.markdown("""
             <div class="tutorial-step">
                 <div class="tutorial-step-icon">📈</div>
-                <div class="tutorial-step-title">Step 2: Analyze Risk</div>
+                <div class="tutorial-step-title">Analyze Risk</div>
                 <div class="tutorial-step-desc">Review historical performance, volatility, correlation metrics, and IPS alignment.</div>
             </div>
             """, unsafe_allow_html=True)
@@ -175,20 +189,16 @@ if not st.session_state.tutorial_seen:
             st.markdown("""
             <div class="tutorial-step">
                 <div class="tutorial-step-icon">🔮</div>
-                <div class="tutorial-step-title">Step 3: Stress Test</div>
-                <div class="tutorial-step-desc">Run Monte Carlo simulations with withdrawals and export your analysis as a PDF.</div>
+                <div class="tutorial-step-title">Stress Test</div>
+                <div class="tutorial-step-desc">Run Monte Carlo simulations with withdrawals and export a PDF tear sheet.</div>
             </div>
             """, unsafe_allow_html=True)
         
-        # Centered Get Started button
-        st.markdown('<br><br>', unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
+        _, btn_col, _ = st.columns([1, 2, 1])
+        with btn_col:
             if st.button('Get Started', use_container_width=True, type='primary'):
                 st.session_state.tutorial_seen = True
                 st.rerun()
-        
-        st.markdown('</div>', unsafe_allow_html=True)
 
 # Initialize session state
 if 'app_step' not in st.session_state:
@@ -209,13 +219,8 @@ if 'current_chart' not in st.session_state:
 # Onboarding UI
 if st.session_state.app_step == 'onboarding':
     with st.container(border=True):
-        st.markdown("### Step 1 of 2: Risk Profile")
-        st.progress(0.5)
-        
         st.subheader('📝 Define Your Investment Policy')
-        st.markdown("Answer a few questions to create your personalized Investment Policy Statement")
-        
-        st.markdown("---")
+        st.caption('Answer a few questions to create your personalized Investment Policy Statement.')
         
         # Time & Liquidity Section
         st.markdown("##### ⏰ Time Horizon & Liquidity")
@@ -235,8 +240,6 @@ if st.session_state.app_step == 'onboarding':
             help='Money you need in cash soon should not be exposed to the stock market. High liquidity needs require a more conservative approach.'
         )
         
-        st.markdown("---")
-        
         # Investment Goals Section
         st.markdown("##### 🎯 Investment Objectives")
         objective = st.radio(
@@ -245,8 +248,6 @@ if st.session_state.app_step == 'onboarding':
             horizontal=True,
             help='Capital preservation protects what you have. Income generates cash flow. Growth aims to increase the total value of your assets over time.'
         )
-        
-        st.markdown("---")
         
         # Risk Tolerance Section
         st.markdown("##### 📉 Risk Tolerance")
@@ -263,8 +264,6 @@ if st.session_state.app_step == 'onboarding':
             value='Intermediate'
         )
         
-        st.markdown("---")
-        
         # Generate IPS Button
         if st.button('Generate My IPS', use_container_width=True):
             # Calculate IPS and store in session state
@@ -276,25 +275,12 @@ if st.session_state.app_step == 'onboarding':
 
 # Analysis UI
 elif st.session_state.app_step == 'analysis':
-    st.markdown("### Step 2 of 2: Portfolio Analysis")
-    st.progress(1.0)
-    
-    # Display IPS summary banner with reset button and PDF download
+    # Compact IPS banner
     if st.session_state.ips_profile and st.session_state.ips_targets:
-        col1, col2, col3 = st.columns([3, 1, 1])
+        col1, col2 = st.columns([5, 1])
         with col1:
-            st.success(f"🎯 **Your Active IPS**: {st.session_state.ips_profile}")
+            st.info(f"🎯 **Active IPS**: {st.session_state.ips_profile}")
         with col2:
-            # PDF Download button (only shows if analysis data is available)
-            if 'pdf_data' in st.session_state and st.session_state.pdf_data:
-                st.download_button(
-                    label="📄 Download PDF",
-                    data=st.session_state.pdf_data,
-                    file_name="Portfolio_Tear_Sheet.pdf",
-                    mime="application/pdf",
-                    use_container_width=True
-                )
-        with col3:
             if st.button("🔄 Reset IPS", use_container_width=True):
                 st.session_state.app_step = 'onboarding'
                 st.session_state.ips_profile = None
@@ -302,16 +288,15 @@ elif st.session_state.app_step == 'analysis':
                 st.session_state.pdf_data = None
                 st.rerun()
     
-    # Input Method Selection
-    input_method = st.radio(
-        "Input Method",
-        options=["Paste Text", "Upload CSV"],
-        horizontal=True
-    )
-    
     # Data Ingestion Card
     with st.container(border=True):
-        st.subheader('📥 Update Portfolio Data')
+        st.subheader('📥 Portfolio Data')
+        input_method = st.radio(
+            "Input Method",
+            options=["Paste Text", "Upload CSV"],
+            horizontal=True,
+            label_visibility='collapsed'
+        )
         
         if input_method == "Paste Text":
             pasted_text = st.text_area(
@@ -328,54 +313,16 @@ elif st.session_state.app_step == 'analysis':
                     if not portfolio:
                         st.error("No valid tickers found. Please check your input format.")
                     else:
-                        st.success(f"Found {len(portfolio)} ticker(s): {', '.join(portfolio.keys())}")
-                        
                         with st.spinner("Fetching market data..."):
                             metrics = calculate_portfolio_metrics(portfolio, base_currency)
                         
                         if metrics is None:
                             st.error("Unable to fetch data for the provided tickers. Please verify ticker symbols.")
                         else:
-                            # Store metrics in session state for PDF generation
                             st.session_state.current_metrics = metrics
                             st.session_state.current_portfolio = portfolio
-                            
-                            # Create and store chart for later use
-                            pastel_colors = ['#8884d8', '#82ca9d', '#ffc658']
-                            chart_fig = px.line(
-                                metrics['chart_data'],
-                                labels={
-                                    "value": "Growth Multiplier",
-                                    "index": "Date",
-                                    "variable": "Series"
-                                },
-                                color_discrete_sequence=pastel_colors
-                            )
-                            chart_fig.update_traces(line=dict(width=3))
-                            chart_fig.update_layout(
-                                template='plotly_white',
-                                paper_bgcolor='rgba(0,0,0,0)',
-                                plot_bgcolor='rgba(0,0,0,0)',
-                                yaxis_title="Growth Multiplier (Starting at 1.0)",
-                                xaxis_title="",
-                                showlegend=True,
-                                legend=dict(
-                                    orientation="h",
-                                    yanchor="bottom",
-                                    y=1.02,
-                                    xanchor="right",
-                                    x=1,
-                                    font=dict(color='#4a5568')
-                                ),
-                                hovermode="x unified",
-                                margin=dict(l=0, r=0, t=40, b=0),
-                                font=dict(color='#4a5568')
-                            )
-                            chart_fig.update_xaxes(showgrid=False, tickfont=dict(color='#4a5568'))
-                            chart_fig.update_yaxes(showgrid=False, tickformat=".1f", tickfont=dict(color='#4a5568'))
-                            st.session_state.current_chart = chart_fig
-                            
-                            st.success("✅ Analysis complete! Your portfolio results are displayed below.")
+                            st.session_state.current_chart = build_growth_chart(metrics['chart_data'])
+                            st.success("✅ Analysis complete! Results are displayed below.")
                 
                 except Exception as e:
                     st.error(f"An error occurred: {str(e)}")
@@ -415,62 +362,20 @@ elif st.session_state.app_step == 'analysis':
             with col5:
                 st.metric("Max Drawdown", f"{metrics['max_drawdown'] * 100:.2f}%", 
                         help='The ultimate "sleep at night" metric. This is the largest single percentage drop your portfolio experienced from a peak to a bottom during this timeframe.')
+            
+            # Investor summary paragraph
+            summary = generate_investor_summary(metrics)
+            st.markdown(f'<p class="investor-summary">{summary}</p>', unsafe_allow_html=True)
         
         # Visualization Card
         with st.container(border=True):
             st.subheader('📊 3-Year Growth Trajectory')
             
-            # Generate chart if not in session state
-            if 'current_chart' not in st.session_state:
-                # Pastel color scheme
-                pastel_colors = ['#8884d8', '#82ca9d', '#ffc658']
-                chart_fig = px.line(
-                    metrics['chart_data'],
-                    labels={
-                        "value": "Growth Multiplier",
-                        "index": "Date",
-                        "variable": "Series"
-                    },
-                    color_discrete_sequence=pastel_colors
-                )
-                
-                chart_fig.update_traces(line=dict(width=3))
-                
-                chart_fig.update_layout(
-                    template='plotly_white',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    yaxis_title="Growth Multiplier (Starting at 1.0)",
-                    xaxis_title="",
-                    showlegend=True,
-                    legend=dict(
-                        orientation="h",
-                        yanchor="bottom",
-                        y=1.02,
-                        xanchor="right",
-                        x=1,
-                        font=dict(color='#4a5568')
-                    ),
-                    hovermode="x unified",
-                    margin=dict(l=0, r=0, t=40, b=0),
-                    font=dict(color='#4a5568')
-                )
-                
-                chart_fig.update_xaxes(showgrid=False, tickfont=dict(color='#4a5568'))
-                chart_fig.update_yaxes(showgrid=False, tickformat=".1f", tickfont=dict(color='#4a5568'))
-                
-                # Store chart in session state for PDF generation
-                st.session_state.current_chart = chart_fig
-                
-                st.plotly_chart(chart_fig, use_container_width=True)
-            else:
-                # Validate that current_chart is a valid Plotly figure
-                if st.session_state.current_chart and hasattr(st.session_state.current_chart, 'data'):
-                    st.plotly_chart(st.session_state.current_chart, use_container_width=True)
-                else:
-                    st.error("Chart data is not available. Please try analyzing your portfolio again.")
-                    # Clear invalid chart from session state
-                    st.session_state.current_chart = None
+            # Build chart if not yet in session state
+            if not st.session_state.get('current_chart') or not hasattr(st.session_state.current_chart, 'data'):
+                st.session_state.current_chart = build_growth_chart(metrics['chart_data'])
+            
+            st.plotly_chart(st.session_state.current_chart, use_container_width=True)
         
         # Risk Analysis Card - Correlation Heatmap
         if metrics.get('correlation_matrix') is not None and not metrics['correlation_matrix'].empty:
@@ -650,23 +555,8 @@ elif st.session_state.app_step == 'analysis':
             
             st.caption("📊 This simulation runs 500 randomized market scenarios based on your portfolio's historical risk/return profile. The three lines represent the range of probable outcomes: bear market (10th percentile), expected case (median), and bull market (90th percentile).")
         
-        # PDF Generation Button
-        st.divider()
-        
-        # Add anchor point for auto-scroll
-        st.markdown('<div id="pdf-generation-section"></div>', unsafe_allow_html=True)
-        
+        # PDF Generation
         if st.button("📄 Generate PDF Report", type="primary", use_container_width=True, key="pdf_generate"):
-            # Auto-scroll to this section
-            st.markdown(
-                """
-                <script>
-                    window.parent.document.getElementById('pdf-generation-section').scrollIntoView({behavior: 'smooth', block: 'start'});
-                </script>
-                """,
-                unsafe_allow_html=True
-            )
-            
             # Create progress container
             progress_bar = st.progress(0)
             status_text = st.empty()
@@ -708,39 +598,7 @@ elif st.session_state.app_step == 'analysis':
                     # Generate PDF
                     chart_fig = st.session_state.get('current_chart')
                     if not chart_fig or not hasattr(chart_fig, 'data'):
-                        # Generate chart if not available
-                        pastel_colors = ['#8884d8', '#82ca9d', '#ffc658']
-                        chart_fig = px.line(
-                            st.session_state.current_metrics['chart_data'],
-                            labels={
-                                "value": "Growth Multiplier",
-                                "index": "Date",
-                                "variable": "Series"
-                            },
-                            color_discrete_sequence=pastel_colors
-                        )
-                        chart_fig.update_traces(line=dict(width=3))
-                        chart_fig.update_layout(
-                            template='plotly_white',
-                            paper_bgcolor='rgba(0,0,0,0)',
-                            plot_bgcolor='rgba(0,0,0,0)',
-                            yaxis_title="Growth Multiplier (Starting at 1.0)",
-                            xaxis_title="",
-                            showlegend=True,
-                            legend=dict(
-                                orientation="h",
-                                yanchor="bottom",
-                                y=1.02,
-                                xanchor="right",
-                                x=1,
-                                font=dict(color='#4a5568')
-                            ),
-                            hovermode="x unified",
-                            margin=dict(l=0, r=0, t=40, b=0),
-                            font=dict(color='#4a5568')
-                        )
-                        chart_fig.update_xaxes(showgrid=False, tickfont=dict(color='#4a5568'))
-                        chart_fig.update_yaxes(showgrid=False, tickformat=".1f", tickfont=dict(color='#4a5568'))
+                        chart_fig = build_growth_chart(st.session_state.current_metrics['chart_data'])
                     
                     # Step 4: Generate PDF
                     status_text.text("⏳ Generating PDF document... (80%)")
@@ -805,10 +663,8 @@ elif st.session_state.app_step == 'analysis':
             mime="text/csv"
         )
         
-        st.info("Upload a CSV file with two columns: Ticker (first column) and Shares (second column). Header names are ignored.")
-        
-        uploaded_file = st.file_uploader("Choose a CSV file", type=['csv'],
-                                   help='Upload a simple 2-column CSV file. Column 1: Ticker Symbols. Column 2: Number of shares.')
+        uploaded_file = st.file_uploader("Upload CSV (Ticker, Shares)", type=['csv'],
+                                   help='Two-column CSV: Column 1 = Ticker Symbol, Column 2 = Number of Shares.')
         
         if uploaded_file is not None:
             try:
@@ -828,54 +684,16 @@ elif st.session_state.app_step == 'analysis':
                         if not portfolio:
                             st.error("No valid tickers found in CSV. Please check your file format.")
                         else:
-                            st.success(f"Found {len(portfolio)} ticker(s): {', '.join(portfolio.keys())}")
-                            
                             with st.spinner("Fetching market data..."):
                                 metrics = calculate_portfolio_metrics(portfolio, base_currency)
                         
                         if metrics is None:
                             st.error("Unable to fetch data for the provided tickers. Please verify ticker symbols.")
                         else:
-                            # Store metrics in session state for PDF generation
                             st.session_state.current_metrics = metrics
                             st.session_state.current_portfolio = portfolio
-                            
-                            # Create and store chart for later use
-                            pastel_colors = ['#8884d8', '#82ca9d', '#ffc658']
-                            chart_fig = px.line(
-                                metrics['chart_data'],
-                                labels={
-                                    "value": "Growth Multiplier",
-                                    "index": "Date",
-                                    "variable": "Series"
-                                },
-                                color_discrete_sequence=pastel_colors
-                            )
-                            chart_fig.update_traces(line=dict(width=3))
-                            chart_fig.update_layout(
-                                template='plotly_white',
-                                paper_bgcolor='rgba(0,0,0,0)',
-                                plot_bgcolor='rgba(0,0,0,0)',
-                                yaxis_title="Growth Multiplier (Starting at 1.0)",
-                                xaxis_title="",
-                                showlegend=True,
-                                legend=dict(
-                                    orientation="h",
-                                    yanchor="bottom",
-                                    y=1.02,
-                                    xanchor="right",
-                                    x=1,
-                                    font=dict(color='#4a5568')
-                                ),
-                                hovermode="x unified",
-                                margin=dict(l=0, r=0, t=40, b=0),
-                                font=dict(color='#4a5568')
-                            )
-                            chart_fig.update_xaxes(showgrid=False, tickfont=dict(color='#4a5568'))
-                            chart_fig.update_yaxes(showgrid=False, tickformat=".1f", tickfont=dict(color='#4a5568'))
-                            st.session_state.current_chart = chart_fig
-                            
-                            st.success("✅ Analysis complete! Your portfolio results are displayed below.")
+                            st.session_state.current_chart = build_growth_chart(metrics['chart_data'])
+                            st.success("✅ Analysis complete! Results are displayed below.")
                     
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
