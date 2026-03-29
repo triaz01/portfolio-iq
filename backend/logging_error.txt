@@ -1,0 +1,1 @@
+Failed to log: [Errno 13] Permission denied: 'debug_log.txt'

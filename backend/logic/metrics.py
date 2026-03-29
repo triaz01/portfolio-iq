@@ -1,15 +1,17 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
+from functools import lru_cache
+import time
 
 def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
     try:
         print("\n" + "="*50)
-        print("📊 STARTING PORTFOLIO METRICS CALCULATION")
+        print("[INFO] STARTING PORTFOLIO METRICS CALCULATION")
         print("="*50)
         
         if not portfolio or not isinstance(portfolio, dict):
-            print("❌ Error: Invalid portfolio input")
+            print("[ERROR] Error: Invalid portfolio input")
             return None
         
         price_data = {}
@@ -17,10 +19,10 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
         fx_cache = {}
         ignored_tickers = []
         
-        print(f"📈 Processing {len(portfolio)} tickers for {base_currency} base currency")
+        print(f"[INFO] Processing {len(portfolio)} tickers for {base_currency} base currency")
         
         for ticker, shares in portfolio.items():
-            print(f"\n🔍 Processing {ticker} ({shares} shares)")
+            print(f"\n[INFO] Processing {ticker} ({shares} shares)")
             
             stock = yf.Ticker(ticker)
             hist = stock.history(period="3y")
@@ -38,11 +40,11 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                     clean_ticker           # US stock that just needed formatting cleanup
                 ]
                 
-                print(f"  🔄 Initial fetch failed, trying {len(fallback_candidates)} fallback candidates")
+                print(f"  [INFO] Initial fetch failed, trying {len(fallback_candidates)} fallback candidates")
                 found_match = False
                 
                 for candidate in fallback_candidates:
-                    print(f"    🔍 Trying {candidate}...")
+                    print(f"    [INFO] Trying {candidate}...")
                     fallback_stock = yf.Ticker(candidate)
                     fallback_hist = fallback_stock.history(period="3y")
                     
@@ -51,11 +53,12 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                         ticker = candidate
                         stock = fallback_stock
                         hist = fallback_hist
-                        print(f"  ✅ Success! Found data for {ticker}")
+                        print(f"  [SUCCESS] Success! Found data for {ticker}")
                         found_match = True
                         break
                     else:
-                        print(f"    ❌ No data for {candidate}")
+                        print(f"    [ERROR] No data for {candidate}")
+                        pass
                 
                 if not found_match:
                     # All fallback candidates failed - add to ignored list
@@ -63,7 +66,7 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                         'symbol': ticker,
                         'reason': 'Could not find valid price data on US or Canadian exchanges after trying all fallback candidates.'
                     })
-                    print(f"  ❌ All fallback candidates failed. Ignoring {ticker}")
+                    print(f"  [ERROR] All fallback candidates failed. Ignoring {ticker}")
                     continue
             
             if not hist.empty and 'Close' in hist.columns:
@@ -71,7 +74,7 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                 
                 info = stock.info
                 stock_currency = info.get('currency', 'USD')
-                print(f"  💰 Stock currency: {stock_currency}")
+                print(f"  [INFO] Stock currency: {stock_currency}")
                 
                 # Currency conversion logic
                 if stock_currency != base_currency:
@@ -82,7 +85,7 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                     else:
                         fx_ticker = f"{stock_currency}{base_currency}=X"
                     
-                    print(f"  🔄 Converting {stock_currency} to {base_currency} using {fx_ticker}")
+                    print(f"  [INFO] Converting {stock_currency} to {base_currency} using {fx_ticker}")
                     
                     if fx_ticker not in fx_cache:
                         fx_data = yf.Ticker(fx_ticker).history(period="3y")
@@ -100,9 +103,10 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                         combined_df = combined_df.dropna()
                         
                         stock_prices = combined_df['stock'] * combined_df['fx']
-                        print(f"  ✅ Successfully converted prices to {base_currency}")
+                        print(f"  [SUCCESS] Successfully converted prices to {base_currency}")
                     else:
-                        print(f"  ❌ Failed to fetch FX data for {fx_ticker}")
+                        print(f"  [ERROR] Failed to fetch FX data for {fx_ticker}")
+                        pass
                 
                 price_data[ticker] = stock_prices
                 
@@ -120,26 +124,72 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                 current_price = stock_prices.iloc[-1]
                 current_value = shares * current_price
                 
-                print(f"  📊 Latest price: {current_price:.2f} {base_currency}")
-                print(f"  📊 Current value: {current_value:.2f} {base_currency}")
-                print(f"  📊 Dividend Yield (raw): {div_yield:.4f} ({div_yield*100:.2f}%)")
+                print(f"  [INFO] Latest price: {current_price:.2f} {base_currency}")
+                print(f"  [INFO] Current value: {current_value:.2f} {base_currency}")
+                print(f"  [INFO] Dividend Yield (raw): {div_yield:.4f} ({div_yield*100:.2f}%)")
                 
-                # Extract analyst price target
-                raw_target = info.get('targetMeanPrice') or info.get('targetMedianPrice')
+                # Extract analyst price target with comprehensive fallback
+                target_price = None
+                source_field = "none"
                 
-                if raw_target is not None:
-                    # Target price needs FX conversion if stock needed it
-                    if stock_currency != base_currency and fx_cache.get(fx_ticker) is not None:
+                # FIX 1: Try multiple info fields in order
+                target_fields = ['targetMeanPrice', 'targetMedianPrice', 'targetHighPrice']
+                for field in target_fields:
+                    value = info.get(field)
+                    if value is not None and value > 0:
+                        target_price = value
+                        source_field = field
+                        break
+                
+                # FIX 2: Handle currency conversion properly for Canadian stocks
+                is_canadian_stock = ticker.endswith(('.TO', '.V', '.VN', '.TSX'))
+                
+                if target_price is not None:
+                    # Only apply FX conversion for non-Canadian stocks
+                    if not is_canadian_stock and stock_currency != base_currency and fx_cache.get(fx_ticker) is not None:
                         latest_fx = combined_df['fx'].iloc[-1]
-                        target_price = raw_target * latest_fx
-                        print(f"  🎯 Analyst target: {raw_target:.2f} {stock_currency} → {target_price:.2f} {base_currency}")
+                        target_price = target_price * latest_fx
+                        print(f"  [TARGETS] {ticker}: current={current_price:.2f}, target={target_price:.2f} ({source_field} + FX), source={source_field}")
                     else:
-                        target_price = raw_target
-                        print(f"  🎯 Analyst target: {target_price:.2f} {base_currency}")
+                        print(f"  [TARGETS] {ticker}: current={current_price:.2f}, target={target_price:.2f}, source={source_field}")
                 else:
-                    # Fallback to current price for ETFs and stocks without analyst coverage
-                    target_price = current_price
-                    print(f"  🎯 No analyst target available, using current price: {target_price:.2f} {base_currency}")
+                    # FIX 3: Fallback using recommendations and analyst_price_targets
+                    try:
+                        # Step 1: Try recommendations DataFrame
+                        recommendations = ticker_obj.recommendations
+                        if recommendations is not None and not recommendations.empty:
+                            latest_rec = recommendations.iloc[-1]
+                            # Look for target price in recommendations
+                            for col in latest_rec.index:
+                                if 'target' in col.lower() and pd.notna(latest_rec[col]):
+                                    target_price = float(latest_rec[col])
+                                    source_field = "recommendations"
+                                    break
+                        
+                        # Step 2: Try analyst_price_targets dict
+                        if target_price is None:
+                            try:
+                                analyst_targets = ticker_obj.analyst_price_targets
+                                if analyst_targets and isinstance(analyst_targets, dict):
+                                    mean_target = analyst_targets.get('mean')
+                                    if mean_target is not None and mean_target > 0:
+                                        target_price = float(mean_target)
+                                        source_field = "analyst_price_targets"
+                            except (AttributeError, TypeError):
+                                pass
+                        
+                        # Step 3: Final fallback
+                        if target_price is None:
+                            target_price = current_price
+                            source_field = "fallback"
+                        
+                        print(f"  [TARGETS] {ticker}: current={current_price:.2f}, target={target_price:.2f}, source={source_field}")
+                        
+                    except Exception as e:
+                        print(f"  [TARGETS] {ticker}: Error fetching fallback targets - {e}")
+                        target_price = current_price
+                        source_field = "error_fallback"
+                        print(f"  [TARGETS] {ticker}: current={current_price:.2f}, target={target_price:.2f}, source={source_field}")
                 
                 projected_value = shares * target_price
                 
@@ -149,55 +199,58 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                     'shares': shares,
                     'current_value': current_value,
                     'target_price': target_price,
-                    'projected_value': projected_value
+                    'projected_value': projected_value,
+                    'target_source': source_field
                 }
             else:
-                print(f"  ❌ No price data available for {ticker}")
+                print(f"  [ERROR] No price data available for {ticker}")
+                pass
         
         if not price_data:
-            print("❌ No valid price data found")
+            print("[ERROR] No valid price data found")
             return None
         
-        print(f"\n📈 Building price dataframe with {len(price_data)} tickers")
+        print(f"\n[INFO] Building price dataframe with {len(price_data)} tickers")
         price_df = pd.DataFrame(price_data)
-        print(f"📈 Price data shape: {price_df.shape}")
+        print(f"[INFO] Price data shape: {price_df.shape}")
         
         # Calculate total portfolio value and true capital weights
         total_portfolio_value = sum([info['current_value'] for info in stock_info.values()])
         weights = np.array([info['current_value'] / total_portfolio_value for info in stock_info.values()])
         
-        print(f"\n💰 Total Portfolio Value: {total_portfolio_value:.2f} {base_currency}")
-        print("💰 Portfolio Weights:")
+        print(f"\n[INFO] Total Portfolio Value: {total_portfolio_value:.2f} {base_currency}")
+        print("[INFO] Portfolio Weights:")
         for i, (ticker, info) in enumerate(stock_info.items()):
             print(f"  {ticker}: {weights[i]:.4f} ({weights[i]*100:.2f}%)")
+            pass
         
         # Calculate weighted dividend yield only (beta will be calculated from portfolio returns)
         dividend_yields = np.array([info['dividend_yield'] for info in stock_info.values()])
         weighted_dividend_yield = np.dot(dividend_yields, weights)
         
-        print(f"\n📊 Weighted Dividend Yield: {weighted_dividend_yield:.4f} ({weighted_dividend_yield*100:.2f}%)")
+        print(f"\n[INFO] Weighted Dividend Yield: {weighted_dividend_yield:.4f} ({weighted_dividend_yield*100:.2f}%)")
         
         # CRITICAL FIX: Calculate daily returns first, then apply weights
-        print(f"\n📈 Calculating daily returns...")
+        print(f"\n[INFO] Calculating daily returns...")
         daily_returns = price_df.pct_change().dropna()
-        print(f"📈 Daily returns shape: {daily_returns.shape}")
+        print(f"[INFO] Daily returns shape: {daily_returns.shape}")
         
         # Calculate portfolio daily returns as weighted average of individual returns
         portfolio_daily_returns = daily_returns.dot(weights)
-        print(f"📈 Portfolio daily returns shape: {portfolio_daily_returns.shape}")
+        print(f"[INFO] Portfolio daily returns shape: {portfolio_daily_returns.shape}")
         
         # Calculate timeframe information
         trading_days = len(daily_returns)
         years_available = trading_days / 252
-        print(f"📊 Trading days available: {trading_days}")
-        print(f"📊 Years available: {years_available:.2f}")
+        print(f"[INFO] Trading days available: {trading_days}")
+        print(f"[INFO] Years available: {years_available:.2f}")
         
         # Calculate Annualized Volatility over entire timeframe
         annual_volatility = portfolio_daily_returns.std() * np.sqrt(252)
-        print(f"📊 Annualized Volatility: {annual_volatility:.4f} ({annual_volatility*100:.1f}%)")
+        print(f"[INFO] Annualized Volatility: {annual_volatility:.4f} ({annual_volatility*100:.1f}%)")
         
         # Calculate 3-Year Portfolio Beta using covariance/variance method
-        print(f"\n📈 Calculating 3-Year Portfolio Beta...")
+        print(f"\n[INFO] Calculating 3-Year Portfolio Beta...")
         
         # Determine local benchmark based on base currency
         if base_currency == 'CAD':
@@ -207,7 +260,7 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
             benchmark_ticker = '^GSPC'  # S&P 500
             benchmark_name = 'S&P 500'
         
-        print(f"  🔍 Using local benchmark: {benchmark_name} ({benchmark_ticker})")
+        print(f"  [INFO] Using local benchmark: {benchmark_name} ({benchmark_ticker})")
         
         # Download 3 years of benchmark data
         benchmark_stock = yf.Ticker(benchmark_ticker)
@@ -217,7 +270,7 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
             benchmark_prices = benchmark_hist['Close'].copy()
             benchmark_daily_returns = benchmark_prices.pct_change().dropna()
             
-            print(f"  📊 Benchmark daily returns shape: {benchmark_daily_returns.shape}")
+            print(f"  [INFO] Benchmark daily returns shape: {benchmark_daily_returns.shape}")
             
             # Combine portfolio and benchmark returns to align dates
             combined_returns = pd.DataFrame({
@@ -225,7 +278,7 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                 'Benchmark': benchmark_daily_returns
             }).dropna()
             
-            print(f"  📊 Aligned returns shape: {combined_returns.shape}")
+            print(f"  [INFO] Aligned returns shape: {combined_returns.shape}")
             
             # Calculate portfolio beta using covariance/variance formula
             covariance_matrix = combined_returns.cov()
@@ -234,11 +287,11 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
             
             portfolio_beta = covariance_portfolio_benchmark / variance_benchmark
             
-            print(f"  📊 Covariance(Portfolio, Benchmark): {covariance_portfolio_benchmark:.6f}")
-            print(f"  📊 Variance(Benchmark): {variance_benchmark:.6f}")
-            print(f"  📊 3-Year Portfolio Beta: {portfolio_beta:.3f}")
+            print(f"  [INFO] Covariance(Portfolio, Benchmark): {covariance_portfolio_benchmark:.6f}")
+            print(f"  [INFO] Variance(Benchmark): {variance_benchmark:.6f}")
+            print(f"  [INFO] 3-Year Portfolio Beta: {portfolio_beta:.3f}")
         else:
-            print(f"  ❌ No benchmark data available for {benchmark_ticker}")
+            print(f"  [ERROR] No benchmark data available for {benchmark_ticker}")
             portfolio_beta = 1.0  # Default to market beta
         
         # Build cumulative returns series for return and drawdown calculations
@@ -251,13 +304,13 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
         
         # Calculate Annualized Return over entire available timeframe
         annualized_return = (cumulative_returns.iloc[-1]) ** (252 / trading_days) - 1
-        print(f"📊 Annualized Return: {annualized_return:.4f} ({annualized_return*100:.2f}%)")
+        print(f"[INFO] Annualized Return: {annualized_return:.4f} ({annualized_return*100:.2f}%)")
         
         # Calculate correlation matrix using full aligned timeframe
         correlation_matrix = daily_returns.corr()
         
         # Fetch benchmark data
-        print(f"\n📈 Fetching benchmark data...")
+        print(f"\n[INFO] Fetching benchmark data...")
         benchmarks = {
             'S&P 500': {'ticker': '^GSPC', 'currency': 'USD'},
             'TSX Composite': {'ticker': '^GSPTSE', 'currency': 'CAD'}
@@ -266,7 +319,7 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
         benchmark_data = {}
         
         for benchmark_name, benchmark_info in benchmarks.items():
-            print(f"  🔍 Fetching {benchmark_name} ({benchmark_info['ticker']})")
+            print(f"  [INFO] Fetching {benchmark_name} ({benchmark_info['ticker']})")
             
             benchmark_stock = yf.Ticker(benchmark_info['ticker'])
             benchmark_hist = benchmark_stock.history(period="3y")
@@ -275,7 +328,7 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                 benchmark_prices = benchmark_hist['Close'].copy()
                 benchmark_currency = benchmark_info['currency']
                 
-                print(f"    💰 Benchmark currency: {benchmark_currency}")
+                print(f"    [INFO] Benchmark currency: {benchmark_currency}")
                 
                 # Apply same FX conversion logic as stocks
                 if benchmark_currency != base_currency:
@@ -286,7 +339,7 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                     else:
                         fx_ticker = f"{benchmark_currency}{base_currency}=X"
                     
-                    print(f"    � Converting {benchmark_currency} to {base_currency} using {fx_ticker}")
+                    print(f"    [INFO] Converting {benchmark_currency} to {base_currency} using {fx_ticker}")
                     
                     if fx_ticker not in fx_cache:
                         fx_data = yf.Ticker(fx_ticker).history(period="3y")
@@ -304,13 +357,13 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                         combined_df = combined_df.dropna()
                         
                         benchmark_prices = combined_df['benchmark'] * combined_df['fx']
-                        print(f"    ✅ Successfully converted benchmark prices to {base_currency}")
+                        print(f"    [SUCCESS] Successfully converted benchmark prices to {base_currency}")
                     else:
-                        print(f"    ❌ Failed to fetch FX data for {fx_ticker}")
+                        print(f"    [ERROR] Failed to fetch FX data for {fx_ticker}")
                 
                 benchmark_data[benchmark_name] = benchmark_prices
             else:
-                print(f"    ❌ No price data available for {benchmark_name}")
+                print(f"    [ERROR] No price data available for {benchmark_name}")
         
         # Calculate cumulative returns and risk metrics for benchmarks
         benchmark_cumulative = {}
@@ -340,7 +393,7 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                 'max_drawdown': benchmark_max_drawdown
             }
             
-            print(f"  📊 {benchmark_name} - 1Y CAGR: {benchmark_cagr_1y:.4f} ({benchmark_cagr_1y*100:.2f}%), Max DD: {benchmark_max_drawdown:.4f} ({benchmark_max_drawdown*100:.2f}%)")
+            print(f"  [INFO] {benchmark_name} - 1Y CAGR: {benchmark_cagr_1y:.4f} ({benchmark_cagr_1y*100:.2f}%), Max DD: {benchmark_max_drawdown:.4f} ({benchmark_max_drawdown*100:.2f}%)")
         
         # Create chart data - combine portfolio and benchmarks, normalized to start at 1.0
         chart_data = pd.DataFrame({
@@ -353,8 +406,8 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
         # Normalize all series to start at 1.0
         chart_data = chart_data / chart_data.iloc[0]
         
-        print(f"📊 Chart data shape: {chart_data.shape}")
-        print(f"📊 Chart data columns: {list(chart_data.columns)}")
+        print(f"[INFO] Chart data shape: {chart_data.shape}")
+        print(f"[INFO] Chart data columns: {list(chart_data.columns)}")
         
         # Calculate total projected value and build projection DataFrame
         total_projected_value = sum([info['projected_value'] for info in stock_info.values()])
@@ -367,12 +420,13 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                 'Current Price': info['latest_price'],
                 'Target Price': info['target_price'],
                 'Current Value': info['current_value'],
-                'Projected Value': info['projected_value']
+                'Projected Value': info['projected_value'],
+                'Target Source': info['target_source']
             })
         
         projection_df = pd.DataFrame(projection_data)
         
-        print(f"\n📊 Final Metrics:")
+        print(f"\n[INFO] Final Metrics:")
         print(f"  Annualized Return: {annualized_return:.4f} ({annualized_return*100:.2f}%)")
         print(f"  Annualized Volatility: {annual_volatility:.4f} ({annual_volatility*100:.1f}%)")
         print(f"  Years Available: {years_available:.2f}")
@@ -401,7 +455,7 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
         return metrics
     
     except Exception as e:
-        print(f"❌ FATAL ERROR IN METRICS CALCULATION: {e}")
+        print(f"[ERROR] FATAL ERROR IN METRICS CALCULATION: {e}")
         return None
 
 def generate_investor_summary(metrics):
@@ -457,3 +511,185 @@ def generate_investor_summary(metrics):
     except Exception as e:
         print(f"Error generating investor summary: {e}")
         return "Unable to generate portfolio summary at this time."
+
+
+def generate_trading_signals(tickers, benchmark='SPY'):
+    """
+    Generate Buy/Hold/Sell trading signals based on momentum, trend, and relative strength.
+    
+    Parameters:
+    - tickers: List of ticker symbols to analyze
+    - benchmark: Benchmark ticker for relative strength comparison (default: 'SPY')
+    
+    Returns:
+    - DataFrame with columns: Ticker, Momentum (%), Trend vs 200DMA (%), Rel Strength vs SPY (%), Total Score, Recommendation
+    """
+    try:
+        print("\n" + "="*50)
+        print("[INFO] GENERATING TRADING SIGNALS")
+        print("="*50)
+        
+        # Step 1: Data Fetching (400 trading days)
+        print(f"[INFO] Fetching 400 days of data for {len(tickers)} tickers + benchmark ({benchmark})")
+        
+        results = []
+        
+        # Fetch benchmark data first
+        benchmark_ticker = yf.Ticker(benchmark)
+        benchmark_hist = benchmark_ticker.history(period='400d')
+        
+        if benchmark_hist.empty or len(benchmark_hist) < 126:
+            print(f"[ERROR] Insufficient benchmark data for {benchmark}")
+            # Return empty results if benchmark fails
+            for ticker in tickers:
+                results.append({
+                    'Ticker': ticker,
+                    'Momentum (%)': 'N/A',
+                    'Trend vs 200DMA (%)': 'N/A',
+                    f'Rel Strength vs {benchmark} (%)': 'N/A',
+                    'Total Score': 'N/A',
+                    'Recommendation': 'Insufficient Data'
+                })
+            return pd.DataFrame(results)
+        
+        # Forward-fill benchmark data
+        benchmark_hist = benchmark_hist.ffill()
+        benchmark_close = benchmark_hist['Close']
+        
+        print(f"[SUCCESS] Benchmark data fetched: {len(benchmark_close)} days")
+        
+        # Step 2-4: Process each ticker
+        for ticker in tickers:
+            print(f"\n[INFO] Analyzing {ticker}")
+            
+            try:
+                # Fetch ticker data
+                stock = yf.Ticker(ticker)
+                hist = stock.history(period='400d')
+                
+                # Check if we have enough data
+                if hist.empty or len(hist) < 252:
+                    print(f"  [WARNING] Insufficient data for {ticker} (need 252 days, got {len(hist)})")
+                    results.append({
+                        'Ticker': ticker,
+                        'Momentum (%)': 'N/A',
+                        'Trend vs 200DMA (%)': 'N/A',
+                        f'Rel Strength vs {benchmark} (%)': 'N/A',
+                        'Total Score': 'N/A',
+                        'Recommendation': 'Insufficient Data'
+                    })
+                    continue
+                
+                # Forward-fill missing data
+                hist = hist.ffill()
+                close = hist['Close']
+                
+                # Get most recent price (t)
+                current_price = close.iloc[-1]
+                
+                # Step 2: Calculate the 3 Core Signals
+                
+                # Signal 1: 12-1 Momentum (Price[t-21] / Price[t-252]) - 1
+                price_t_21 = close.iloc[-21]
+                price_t_252 = close.iloc[-252]
+                momentum = (price_t_21 / price_t_252) - 1
+                
+                # Score momentum
+                if momentum > 0.05:
+                    momentum_score = 1
+                elif momentum < -0.05:
+                    momentum_score = -1
+                else:
+                    momentum_score = 0
+                
+                print(f"  [INFO] 12-1 Momentum: {momentum*100:.2f}% (Score: {momentum_score})")
+                
+                # Signal 2: 200-Day Trend (Price[t] / SMA200[t]) - 1
+                sma_200 = close.rolling(window=200).mean().iloc[-1]
+                trend = (current_price / sma_200) - 1
+                
+                # Score trend
+                if trend > 0.01:
+                    trend_score = 1
+                elif trend < -0.01:
+                    trend_score = -1
+                else:
+                    trend_score = 0
+                
+                print(f"  [INFO] 200-Day Trend: {trend*100:.2f}% (Score: {trend_score})")
+                
+                # Signal 3: Relative Strength (6-Month) vs Benchmark
+                # Asset return over 126 days
+                price_t_126 = close.iloc[-126]
+                asset_return_126 = (current_price / price_t_126) - 1
+                
+                # Benchmark return over 126 days (align dates)
+                # Find the corresponding benchmark dates
+                asset_dates = hist.index[-126:]
+                benchmark_aligned = benchmark_close.reindex(asset_dates, method='nearest')
+                
+                if len(benchmark_aligned) >= 126:
+                    benchmark_return_126 = (benchmark_aligned.iloc[-1] / benchmark_aligned.iloc[0]) - 1
+                    rel_strength = asset_return_126 - benchmark_return_126
+                    
+                    # Score relative strength
+                    if rel_strength > 0.03:
+                        rel_strength_score = 1
+                    elif rel_strength < -0.03:
+                        rel_strength_score = -1
+                    else:
+                        rel_strength_score = 0
+                    
+                    print(f"  [INFO] Relative Strength vs {benchmark}: {rel_strength*100:.2f}% (Score: {rel_strength_score})")
+                else:
+                    # Fallback if alignment fails
+                    rel_strength = 0
+                    rel_strength_score = 0
+                    print(f"  [WARNING] Could not align benchmark dates, using neutral score")
+                
+                # Step 3: Scoring & Recommendation
+                total_score = momentum_score + trend_score + rel_strength_score
+                
+                # Map to recommendation
+                if total_score >= 2:
+                    recommendation = 'Buy'
+                elif total_score >= 0:
+                    recommendation = 'Hold'
+                else:
+                    recommendation = 'Sell / Avoid'
+                
+                print(f"  [SIGNAL] Total Score: {total_score} -> {recommendation}")
+                
+                # Step 4: Build result row
+                results.append({
+                    'Ticker': ticker,
+                    'Momentum (%)': round(momentum * 100, 2),
+                    'Trend vs 200DMA (%)': round(trend * 100, 2),
+                    f'Rel Strength vs {benchmark} (%)': round(rel_strength * 100, 2),
+                    'Total Score': total_score,
+                    'Recommendation': recommendation
+                })
+                
+            except Exception as e:
+                print(f"  [ERROR] Error processing {ticker}: {e}")
+                results.append({
+                    'Ticker': ticker,
+                    'Momentum (%)': 'N/A',
+                    'Trend vs 200DMA (%)': 'N/A',
+                    f'Rel Strength vs {benchmark} (%)': 'N/A',
+                    'Total Score': 'N/A',
+                    'Recommendation': 'Error'
+                })
+        
+        # Create DataFrame
+        df = pd.DataFrame(results)
+        
+        print("\n" + "="*50)
+        print("[SUCCESS] TRADING SIGNALS GENERATED SUCCESSFULLY")
+        print("="*50)
+        
+        return df
+    
+    except Exception as e:
+        print(f"[ERROR] Error in generate_trading_signals: {e}")
+        return pd.DataFrame()
