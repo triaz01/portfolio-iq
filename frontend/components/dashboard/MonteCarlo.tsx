@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useAppStore } from '@/lib/useAppStore'
+import { useAppStore } from '@/store/useAppStore'
 import { runMonteCarlo } from '@/lib/api'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 

@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { useAppStore } from '@/lib/useAppStore'
+import { useAppStore } from '@/store/useAppStore'
 import { generatePDF, runMonteCarlo, checkAlignment } from '@/lib/api'
 
 export default function PDFBar() {

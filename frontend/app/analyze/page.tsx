@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAppStore } from '@/lib/useAppStore'
+import { useAppStore } from '@/store/useAppStore'
 import PortfolioInput from '@/components/dashboard/PortfolioInput'
 import StatGrid from '@/components/dashboard/StatGrid'
 import GrowthChart from '@/components/dashboard/GrowthChart'

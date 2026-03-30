@@ -1,5 +1,5 @@
 'use client'
-import { useAppStore } from '@/lib/useAppStore'
+import { useAppStore } from '@/store/useAppStore'
 
 export default function Projections() {
   const { projectionDf, metrics } = useAppStore()
@@ -7,8 +7,8 @@ export default function Projections() {
   if (!projectionDf) return null
 
   // Calculate totals
-  const totalCurrentValue = projectionDf.reduce((sum, row) => sum + (row['Current Value'] || 0), 0)
-  const totalProjectedValue = projectionDf.reduce((sum, row) => sum + (row['Projected Value'] || 0), 0)
+  const totalCurrentValue = projectionDf.reduce((sum, row: any) => sum + (row['Current Value'] || 0), 0)
+  const totalProjectedValue = projectionDf.reduce((sum, row: any) => sum + (row['Projected Value'] || 0), 0)
   const totalUpside = totalCurrentValue > 0 ? ((totalProjectedValue - totalCurrentValue) / totalCurrentValue) * 100 : 0
 
   return (

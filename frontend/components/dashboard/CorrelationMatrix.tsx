@@ -1,5 +1,5 @@
 'use client'
-import { useAppStore } from '@/lib/useAppStore'
+import { useAppStore } from '@/store/useAppStore'
 
 export default function CorrelationMatrix() {
   const { correlationMatrix } = useAppStore()

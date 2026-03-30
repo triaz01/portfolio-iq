@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useAppStore } from '@/lib/useAppStore'
+import { useAppStore } from '@/store/useAppStore'
 import { analyzePortfolio, getSignals } from '@/lib/api'
 
 export default function PortfolioInput() {

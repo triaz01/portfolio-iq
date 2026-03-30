@@ -1,5 +1,5 @@
 'use client'
-import { useAppStore } from '@/lib/useAppStore'
+import { useAppStore } from '@/store/useAppStore'
 import { useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
