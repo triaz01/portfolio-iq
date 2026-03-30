@@ -233,7 +233,7 @@ def set_font(pdf, font_style='', size=12, use_unicode_font=False):
     else:
         pdf.set_font('Helvetica', font_style, size)
 
-def generate_pdf_report(metrics, ips_profile, ips_alignment_text, growth_chart_fig, projection_df, ips_targets=None, monte_carlo_fig=None, correlation_matrix=None, chart_data=None, signals=None, currency="CAD"):
+def generate_pdf_report(metrics, ips_profile, ips_alignment_text, growth_chart_fig, projection_df, ips_targets=None, monte_carlo_fig=None, correlation_matrix=None, chart_data=None, signals=None, currency="CAD", mc_years: int = 20, mc_withdrawal: float = 0):
     """
     Generate a comprehensive PDF tear sheet with all analysis sections.
     
@@ -373,39 +373,106 @@ def generate_pdf_report(metrics, ips_profile, ips_alignment_text, growth_chart_f
         if growth_chart_fig is not None:
             pdf.add_page()
             pdf.set_font('Helvetica', 'B', 14)
-            pdf.cell(0, 8, 'Portfolio Growth Trajectory', ln=True)
+            pdf.cell(0, 8, 'Portfolio Performance Summary', ln=True)
             pdf.ln(2)
             
             pdf.set_font('Helvetica', '', 10)
-            pdf.cell(0, 5, '3-year portfolio growth projection based on historical performance:', ln=True)
+            pdf.cell(0, 5, 'Portfolio returns across multiple time horizons:', ln=True)
             pdf.ln(3)
             
-            # Save chart as temporary image
-            temp_path = None
-            try:
-                import tempfile
-                with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
-                    temp_path = tmp.name
-                
-                # Export Plotly chart to image
-                growth_chart_fig.write_image(temp_path, width=800, height=400, scale=2)
-                
-                # Insert image into PDF
-                pdf.image(temp_path, x=10, w=190)
-                pdf.ln(4)
+            # Performance table
+            periods = [
+                ('1 Month', 21),
+                ('6 Month', 126),
+                ('1 Year', 252),
+                ('3 Year', 756)
+            ]
             
-            except Exception as chart_error:
+            # Convert chart_data to DataFrame if it's a dictionary
+            import pandas as pd
+            if chart_data is None or chart_data == {}:
+                # Skip performance table if no chart data
                 pdf.set_font('Helvetica', 'I', 9)
-                pdf.cell(0, 5, f'Chart generation error: {safe_pdf_text(str(chart_error))}', ln=True)
+                pdf.cell(0, 6, 'Performance data unavailable', ln=True)
                 pdf.ln(2)
-            
-            finally:
-                # Clean up temporary file
-                if temp_path and os.path.exists(temp_path):
+            else:
+                # Table headers
+                pdf.set_font('Helvetica', 'B', 10)
+                pdf.cell(40, 6, 'Period', 1, 0, 'L')
+                pdf.cell(50, 6, 'Portfolio Return', 1, 0, 'C')
+                pdf.cell(50, 6, 'S&P 500', 1, 0, 'C')
+                pdf.cell(50, 6, 'Outperformance', 1, 1, 'C')
+                pdf.ln(2)
+                
+                if isinstance(chart_data, dict):
+                    # Convert dict back to DataFrame
+                    chart_data = pd.DataFrame.from_dict(chart_data, orient='index')
+                    # Convert index to datetime if it's string
+                    if chart_data.index.dtype == 'object':
+                        chart_data.index = pd.to_datetime(chart_data.index)
+                    # Sort by index
+                    chart_data = chart_data.sort_index()
+                
+                # Debug: Print chart_data info
+                print(f"[PDF DEBUG] Chart data type: {type(chart_data)}")
+                print(f"[PDF DEBUG] Chart data shape: {chart_data.shape}")
+                print(f"[PDF DEBUG] Chart data columns: {list(chart_data.columns)}")
+                print(f"[PDF DEBUG] Chart data sample:\n{chart_data.tail()}")
+                
+                # Calculate returns for each period
+                pdf.set_font('Helvetica', '', 9)
+                for period_name, days_back in periods:
                     try:
-                        os.unlink(temp_path)
-                    except:
-                        pass
+                        if len(chart_data) > days_back:
+                            # Get current and historical values
+                            current_values = chart_data.iloc[-1]
+                            historical_values = chart_data.iloc[-days_back-1]
+                            
+                            # Calculate portfolio return using 'Portfolio' column
+                            portfolio_current = current_values['Portfolio']
+                            portfolio_historical = historical_values['Portfolio']
+                            portfolio_return = ((portfolio_current - portfolio_historical) / portfolio_historical) * 100
+                            
+                            # Find benchmark column (usually SPY or similar)
+                            benchmark_col = None
+                            for col in chart_data.columns:
+                                if col != 'Portfolio':
+                                    benchmark_col = col
+                                    break
+                            
+                            if benchmark_col:
+                                sp500_current = current_values[benchmark_col]
+                                sp500_historical = historical_values[benchmark_col]
+                                sp500_return = ((sp500_current - sp500_historical) / sp500_historical) * 100
+                                outperformance = portfolio_return - sp500_return
+                                
+                                sp500_str = f"{sp500_return:+.2f}%"
+                                outperformance_str = f"{outperformance:+.2f}%"
+                            else:
+                                sp500_str = "N/A"
+                                outperformance_str = "N/A"
+                            
+                            # Format portfolio return
+                            portfolio_str = f"{portfolio_return:+.2f}%"
+                        else:
+                            portfolio_str = "N/A"
+                            sp500_str = "N/A"
+                            outperformance_str = "N/A"
+                            
+                    except Exception as e:
+                        portfolio_str = "N/A"
+                        sp500_str = "N/A"
+                        outperformance_str = "N/A"
+                    
+                    # Add row to table
+                    pdf.cell(40, 6, period_name, 1, 0, 'L')
+                    pdf.cell(50, 6, portfolio_str, 1, 0, 'C')
+                    pdf.cell(50, 6, sp500_str, 1, 0, 'C')
+                    pdf.cell(50, 6, outperformance_str, 1, 1, 'C')
+                
+                pdf.ln(2)
+                pdf.set_font('Helvetica', 'I', 8)
+                pdf.cell(0, 4, 'N/A = insufficient historical data for that time period', ln=True)
         
         # Section 4: Holdings & Projections
         pdf.add_page()
@@ -491,32 +558,98 @@ def generate_pdf_report(metrics, ips_profile, ips_alignment_text, growth_chart_f
             pdf.cell(0, 4, '  - Bull Market (90th percentile): Optimistic outcome', ln=True)
             pdf.ln(4)
             
-            # Save Monte Carlo chart as temporary image
-            mc_temp_path = None
+            # SUB-SECTION A — Simulation Parameters
+            pdf.set_font('Helvetica', 'B', 11)
+            pdf.cell(0, 6, 'Simulation Parameters:', ln=True)
+            pdf.ln(2)
+            
+            pdf.set_font('Helvetica', '', 9)
+            starting_value = metrics.get('total_value', 0)
+            expected_return = metrics.get('annualized_return', 0) * 100
+            expected_volatility = metrics.get('annual_volatility', 0) * 100
+            
+            pdf.cell(0, 5, f'Time Horizon:        {mc_years} years', ln=True)
+            pdf.cell(0, 5, f'Annual Withdrawal:   ${mc_withdrawal:,.0f}', ln=True)
+            pdf.cell(0, 5, f'Current Value:       ${starting_value:,.0f}', ln=True)
+            pdf.cell(0, 5, f'Expected Return:     {expected_return:.2f}%', ln=True)
+            pdf.cell(0, 5, f'Expected Volatility: {expected_volatility:.2f}%', ln=True)
+            pdf.ln(4)
+            
+            # SUB-SECTION B — Scenario Results table
+            pdf.set_font('Helvetica', 'B', 11)
+            pdf.cell(0, 6, 'Scenario Results:', ln=True)
+            pdf.ln(2)
+            
+            # Table headers
+            pdf.set_font('Helvetica', 'B', 9)
+            pdf.cell(60, 6, 'Scenario', 1, 0, 'L')
+            pdf.cell(50, 6, 'Final Value', 1, 0, 'C')
+            pdf.cell(50, 6, 'Change', 1, 1, 'C')
+            pdf.ln(2)
+            
             try:
-                import tempfile
-                with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
-                    mc_temp_path = tmp.name
+                # Check if volatility is effectively zero - if so, Monte Carlo is not meaningful
+                # Use a small threshold to handle very low volatility that rounds to 0.00%
+                if expected_volatility <= 0.001:  # Less than 0.1% volatility
+                    # When volatility is near zero, all scenarios are nearly identical
+                    # Calculate simple compound growth with withdrawals
+                    final_value = starting_value
+                    for year in range(mc_years):
+                        final_value = final_value * (1 + expected_return/100) - mc_withdrawal
+                        if final_value <= 0:
+                            final_value = 0
+                            break
+                    
+                    # All scenarios are the same when volatility is near zero
+                    bear_value = expected_value = bull_value = final_value
+                else:
+                    # Run Monte Carlo calculation
+                    from logic.monte_carlo import run_monte_carlo
+                    mc_results = run_monte_carlo(
+                        initial_value=starting_value,
+                        cagr=expected_return/100,
+                        volatility=expected_volatility/100,
+                        years=mc_years,
+                        annual_withdrawal=mc_withdrawal,
+                        simulations=500
+                    )
+                    
+                    # Get final values from last row
+                    final_values = mc_results.iloc[-1]
+                    bear_value = final_values['10th Percentile (Bear Market)']
+                    expected_value = final_values['50th Percentile (Expected)']
+                    bull_value = final_values['90th Percentile (Bull Market)']
                 
-                # Export Plotly chart to image
-                monte_carlo_fig.write_image(mc_temp_path, width=800, height=400, scale=2)
+                # Calculate percentage changes
+                bear_change = ((bear_value - starting_value) / starting_value) * 100
+                expected_change = ((expected_value - starting_value) / starting_value) * 100
+                bull_change = ((bull_value - starting_value) / starting_value) * 100
                 
-                # Insert image into PDF
-                pdf.image(mc_temp_path, x=10, w=190)
-                pdf.ln(4)
-            
-            except Exception as mc_error:
+                # Add results rows
+                pdf.set_font('Helvetica', '', 9)
+                pdf.cell(60, 6, 'Bear (10th pct)', 1, 0, 'L')
+                pdf.cell(50, 6, f'${bear_value:,.0f}', 1, 0, 'C')
+                pdf.cell(50, 6, f'{bear_change:+.1f}%', 1, 1, 'C')
+                
+                pdf.cell(60, 6, 'Expected (50th pct)', 1, 0, 'L')
+                pdf.cell(50, 6, f'${expected_value:,.0f}', 1, 0, 'C')
+                pdf.cell(50, 6, f'{expected_change:+.1f}%', 1, 1, 'C')
+                
+                pdf.cell(60, 6, 'Bull (90th pct)', 1, 0, 'L')
+                pdf.cell(50, 6, f'${bull_value:,.0f}', 1, 0, 'C')
+                pdf.cell(50, 6, f'{bull_change:+.1f}%', 1, 1, 'C')
+                
+            except Exception as e:
                 pdf.set_font('Helvetica', 'I', 9)
-                pdf.cell(0, 5, f'Monte Carlo chart error: {safe_pdf_text(str(mc_error))}', ln=True)
-                pdf.ln(2)
+                pdf.cell(0, 6, 'Monte Carlo data unavailable', ln=True)
             
-            finally:
-                # Clean up temporary file
-                if mc_temp_path and os.path.exists(mc_temp_path):
-                    try:
-                        os.unlink(mc_temp_path)
-                    except:
-                        pass
+            pdf.ln(2)
+            pdf.set_font('Helvetica', 'I', 8)
+            if expected_volatility <= 0.001:
+                pdf.cell(0, 4, 'Note: Portfolio volatility is too low for meaningful Monte Carlo simulation.', ln=True)
+                pdf.cell(0, 4, 'All scenarios show the same deterministic outcome based on expected return.', ln=True)
+            pdf.cell(0, 4, '500 randomized scenarios based on portfolio historical risk/return profile.', ln=True)
+            pdf.cell(0, 4, 'Results are statistical probabilities, not guarantees.', ln=True)
         
         # Section 6: Trading Signals
         if signals and isinstance(signals, list) and len(signals) > 0:

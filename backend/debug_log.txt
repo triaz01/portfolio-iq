@@ -11662,3 +11662,240 @@
 [2026-03-29 20:16:45.593] IPS_CALCULATION_SUCCESS | profile_type=Moderate, targets_count=5
 [2026-03-29 20:19:19.134] IPS_REQUEST_START | time_horizon=10, liquidity=Low (< 10%), objective=Capital Preservation
 [2026-03-29 20:19:19.140] IPS_CALCULATION_SUCCESS | profile_type=Moderate, targets_count=5
+[2026-03-29 20:56:22.283] IPS_REQUEST_START | time_horizon=10, liquidity=Low (< 10%), objective=Capital Preservation
+[2026-03-29 20:56:22.288] IPS_CALCULATION_SUCCESS | profile_type=Moderate, targets_count=5
+[2026-03-29 21:09:05.221] IPS_REQUEST_START | time_horizon=10, liquidity=Low (< 10%), objective=Capital Preservation
+[2026-03-29 21:09:05.228] IPS_CALCULATION_SUCCESS | profile_type=Moderate, targets_count=5
+
+================================================================================
+=== Backend Server Started at 2026-03-29 21:09:06.198375 ===
+================================================================================
+[2026-03-29 21:09:06.201] STARTUP | Loading environment and modules
+[2026-03-29 21:09:06.205] STARTUP | Importing logic modules
+[2026-03-29 21:09:07.399] STARTUP | All modules imported successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-29 21:09:08.188414 ===
+================================================================================
+[2026-03-29 21:09:08.194] STARTUP | Loading environment and modules
+[2026-03-29 21:09:08.198] STARTUP | Importing logic modules
+[2026-03-29 21:09:09.346] STARTUP | All modules imported successfully
+[2026-03-29 21:09:16.380] ANALYZE_REQUEST_START | text_length=25, currency=CAD
+[2026-03-29 21:09:18.672] PARSING_COMPLETE | portfolio={'APPL': 100, 'MSFT': 50, 'RY.TO': 34}
+[2026-03-29 21:09:18.676] METRICS_CALCULATION_START | tickers=['APPL', 'MSFT', 'RY.TO']
+[2026-03-29 21:09:21.427] METRICS_CALCULATION_COMPLETE | metrics_available=True
+[2026-03-29 21:09:21.432] SUMMARY_GENERATION_START
+[2026-03-29 21:09:21.435] SUMMARY_GENERATION_COMPLETE | summary_length=686
+[2026-03-29 21:09:21.438] JSON_CONVERSION_START | Converting projection_df
+[2026-03-29 21:09:21.443] JSON_CONVERSION_SUCCESS | projection_df converted, 2 records
+[2026-03-29 21:09:21.446] JSON_CONVERSION_START | Converting correlation_matrix
+[2026-03-29 21:09:21.449] JSON_CONVERSION_SUCCESS | correlation_matrix converted
+[2026-03-29 21:09:21.452] JSON_CONVERSION_START | Converting chart_data
+[2026-03-29 21:09:21.458] JSON_CONVERSION_SUCCESS | chart_data converted, 705 rows
+[2026-03-29 21:09:21.462] RESPONSE_BUILD_START | Building final response
+[2026-03-29 21:09:21.466] RESPONSE_BUILD_START | Building final response
+[2026-03-29 21:09:21.468] RESPONSE_BUILD_SUCCESS | Response ready to return
+[2026-03-29 21:09:21.472] FINAL_RESPONSE | Returning complete analysis with 94603 bytes
+[2026-03-29 21:09:29.513] PDF_REQUEST_START | Generating PDF with 2 projections
+[2026-03-29 21:09:29.517] PDF_PROJECTIONS_SUCCESS | Created DataFrame with 2 rows
+[2026-03-29 21:09:30.082] PDF_MONTECARLO_SUCCESS | Monte Carlo chart created from frontend data
+[2026-03-29 21:09:30.136] PDF_GENERATION_SUCCESS | PDF generated successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-29 23:24:32.142783 ===
+================================================================================
+[2026-03-29 23:24:32.146] STARTUP | Loading environment and modules
+[2026-03-29 23:24:32.151] STARTUP | Importing logic modules
+[2026-03-29 23:24:33.575] STARTUP | All modules imported successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-29 23:25:29.630608 ===
+================================================================================
+[2026-03-29 23:25:29.634] STARTUP | Loading environment and modules
+[2026-03-29 23:25:29.639] STARTUP | Importing logic modules
+[2026-03-29 23:25:30.847] STARTUP | All modules imported successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-29 23:26:29.712444 ===
+================================================================================
+[2026-03-29 23:26:29.717] STARTUP | Loading environment and modules
+[2026-03-29 23:26:29.722] STARTUP | Importing logic modules
+[2026-03-29 23:26:31.000] STARTUP | All modules imported successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-29 23:26:31.801389 ===
+================================================================================
+[2026-03-29 23:26:31.805] STARTUP | Loading environment and modules
+[2026-03-29 23:26:31.808] STARTUP | Importing logic modules
+[2026-03-29 23:26:33.022] STARTUP | All modules imported successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-29 23:26:33.825061 ===
+================================================================================
+[2026-03-29 23:26:33.829] STARTUP | Loading environment and modules
+[2026-03-29 23:26:33.833] STARTUP | Importing logic modules
+[2026-03-29 23:26:35.073] STARTUP | All modules imported successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-29 23:31:10.452581 ===
+================================================================================
+[2026-03-29 23:31:10.459] STARTUP | Loading environment and modules
+[2026-03-29 23:31:10.464] STARTUP | Importing logic modules
+[2026-03-29 23:31:11.666] STARTUP | All modules imported successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-29 23:31:12.456210 ===
+================================================================================
+[2026-03-29 23:31:12.459] STARTUP | Loading environment and modules
+[2026-03-29 23:31:12.463] STARTUP | Importing logic modules
+[2026-03-29 23:31:13.678] STARTUP | All modules imported successfully
+[2026-03-30 00:13:50.083] IPS_REQUEST_START | time_horizon=10, liquidity=Low (< 10%), objective=Capital Preservation
+[2026-03-30 00:13:50.089] IPS_CALCULATION_SUCCESS | profile_type=Moderate, targets_count=5
+[2026-03-30 00:13:58.029] ANALYZE_REQUEST_START | text_length=16, currency=CAD
+[2026-03-30 00:13:58.755] PARSING_COMPLETE | portfolio={'AAPL': 100, 'MSFT': 50}
+[2026-03-30 00:13:58.758] METRICS_CALCULATION_START | tickers=['AAPL', 'MSFT']
+[2026-03-30 00:13:59.878] METRICS_CALCULATION_COMPLETE | metrics_available=True
+[2026-03-30 00:13:59.881] SUMMARY_GENERATION_START
+[2026-03-30 00:13:59.884] SUMMARY_GENERATION_COMPLETE | summary_length=672
+[2026-03-30 00:13:59.887] JSON_CONVERSION_START | Converting projection_df
+[2026-03-30 00:13:59.892] JSON_CONVERSION_SUCCESS | projection_df converted, 2 records
+[2026-03-30 00:13:59.896] JSON_CONVERSION_START | Converting correlation_matrix
+[2026-03-30 00:13:59.899] JSON_CONVERSION_SUCCESS | correlation_matrix converted
+[2026-03-30 00:13:59.902] JSON_CONVERSION_START | Converting chart_data
+[2026-03-30 00:13:59.909] JSON_CONVERSION_SUCCESS | chart_data converted, 750 rows
+[2026-03-30 00:13:59.912] RESPONSE_BUILD_START | Building final response
+[2026-03-30 00:13:59.915] RESPONSE_BUILD_START | Building final response
+[2026-03-30 00:13:59.918] RESPONSE_BUILD_SUCCESS | Response ready to return
+[2026-03-30 00:13:59.923] FINAL_RESPONSE | Returning complete analysis with 100153 bytes
+[2026-03-30 00:14:07.369] PDF_REQUEST_START | Generating PDF with 2 projections
+[2026-03-30 00:14:07.375] PDF_PROJECTIONS_SUCCESS | Created DataFrame with 2 rows
+[2026-03-30 00:14:07.760] PDF_MONTECARLO_SUCCESS | Monte Carlo chart created from frontend data
+[2026-03-30 00:14:07.792] PDF_GENERATION_SUCCESS | PDF generated successfully
+[2026-03-30 00:14:20.612] PDF_REQUEST_START | Generating PDF with 2 projections
+[2026-03-30 00:14:20.617] PDF_PROJECTIONS_SUCCESS | Created DataFrame with 2 rows
+[2026-03-30 00:14:20.647] PDF_MONTECARLO_SUCCESS | Monte Carlo chart created from frontend data
+[2026-03-30 00:14:20.677] PDF_GENERATION_SUCCESS | PDF generated successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-30 00:15:31.484173 ===
+================================================================================
+[2026-03-30 00:15:31.488] STARTUP | Loading environment and modules
+[2026-03-30 00:15:31.493] STARTUP | Importing logic modules
+[2026-03-30 00:15:32.712] STARTUP | All modules imported successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-30 00:15:33.537310 ===
+================================================================================
+[2026-03-30 00:15:33.540] STARTUP | Loading environment and modules
+[2026-03-30 00:15:33.545] STARTUP | Importing logic modules
+[2026-03-30 00:15:34.720] STARTUP | All modules imported successfully
+[2026-03-30 00:15:37.464] IPS_REQUEST_START | time_horizon=10, liquidity=Low (< 10%), objective=Capital Preservation
+[2026-03-30 00:15:37.470] IPS_CALCULATION_SUCCESS | profile_type=Moderate, targets_count=5
+[2026-03-30 00:15:44.179] ANALYZE_REQUEST_START | text_length=16, currency=CAD
+[2026-03-30 00:15:44.942] PARSING_COMPLETE | portfolio={'AAPL': 100, 'MSFT': 50}
+[2026-03-30 00:15:44.945] METRICS_CALCULATION_START | tickers=['AAPL', 'MSFT']
+[2026-03-30 00:15:46.089] METRICS_CALCULATION_COMPLETE | metrics_available=True
+[2026-03-30 00:15:46.092] SUMMARY_GENERATION_START
+[2026-03-30 00:15:46.096] SUMMARY_GENERATION_COMPLETE | summary_length=672
+[2026-03-30 00:15:46.098] JSON_CONVERSION_START | Converting projection_df
+[2026-03-30 00:15:46.103] JSON_CONVERSION_SUCCESS | projection_df converted, 2 records
+[2026-03-30 00:15:46.106] JSON_CONVERSION_START | Converting correlation_matrix
+[2026-03-30 00:15:46.109] JSON_CONVERSION_SUCCESS | correlation_matrix converted
+[2026-03-30 00:15:46.112] JSON_CONVERSION_START | Converting chart_data
+[2026-03-30 00:15:46.119] JSON_CONVERSION_SUCCESS | chart_data converted, 750 rows
+[2026-03-30 00:15:46.121] RESPONSE_BUILD_START | Building final response
+[2026-03-30 00:15:46.125] RESPONSE_BUILD_START | Building final response
+[2026-03-30 00:15:46.128] RESPONSE_BUILD_SUCCESS | Response ready to return
+[2026-03-30 00:15:46.131] FINAL_RESPONSE | Returning complete analysis with 100173 bytes
+[2026-03-30 00:15:49.805] PDF_REQUEST_START | Generating PDF with 2 projections
+[2026-03-30 00:15:49.809] PDF_PROJECTIONS_SUCCESS | Created DataFrame with 2 rows
+[2026-03-30 00:15:50.181] PDF_MONTECARLO_SUCCESS | Monte Carlo chart created from frontend data
+[2026-03-30 00:15:50.243] PDF_GENERATION_SUCCESS | PDF generated successfully
+[2026-03-30 00:18:51.212] IPS_REQUEST_START | time_horizon=10, liquidity=Low (< 10%), objective=Capital Preservation
+[2026-03-30 00:18:51.217] IPS_CALCULATION_SUCCESS | profile_type=Moderate, targets_count=5
+
+================================================================================
+=== Backend Server Started at 2026-03-30 00:18:52.198298 ===
+================================================================================
+[2026-03-30 00:18:52.202] STARTUP | Loading environment and modules
+[2026-03-30 00:18:52.207] STARTUP | Importing logic modules
+[2026-03-30 00:18:53.469] STARTUP | All modules imported successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-30 00:18:54.243990 ===
+================================================================================
+[2026-03-30 00:18:54.246] STARTUP | Loading environment and modules
+[2026-03-30 00:18:54.252] STARTUP | Importing logic modules
+[2026-03-30 00:18:55.462] STARTUP | All modules imported successfully
+[2026-03-30 00:18:57.709] ANALYZE_REQUEST_START | text_length=16, currency=CAD
+[2026-03-30 00:18:58.498] PARSING_COMPLETE | portfolio={'AAPL': 100, 'MSFT': 50}
+[2026-03-30 00:18:58.501] METRICS_CALCULATION_START | tickers=['AAPL', 'MSFT']
+[2026-03-30 00:18:59.613] METRICS_CALCULATION_COMPLETE | metrics_available=True
+[2026-03-30 00:18:59.616] SUMMARY_GENERATION_START
+[2026-03-30 00:18:59.621] SUMMARY_GENERATION_COMPLETE | summary_length=672
+[2026-03-30 00:18:59.625] JSON_CONVERSION_START | Converting projection_df
+[2026-03-30 00:18:59.630] JSON_CONVERSION_SUCCESS | projection_df converted, 2 records
+[2026-03-30 00:18:59.632] JSON_CONVERSION_START | Converting correlation_matrix
+[2026-03-30 00:18:59.636] JSON_CONVERSION_SUCCESS | correlation_matrix converted
+[2026-03-30 00:18:59.639] JSON_CONVERSION_START | Converting chart_data
+[2026-03-30 00:18:59.646] JSON_CONVERSION_SUCCESS | chart_data converted, 750 rows
+[2026-03-30 00:18:59.648] RESPONSE_BUILD_START | Building final response
+[2026-03-30 00:18:59.652] RESPONSE_BUILD_START | Building final response
+[2026-03-30 00:18:59.655] RESPONSE_BUILD_SUCCESS | Response ready to return
+[2026-03-30 00:18:59.659] FINAL_RESPONSE | Returning complete analysis with 100145 bytes
+[2026-03-30 00:19:26.208] PDF_REQUEST_START | Generating PDF with 2 projections
+[2026-03-30 00:19:26.212] PDF_PROJECTIONS_SUCCESS | Created DataFrame with 2 rows
+[2026-03-30 00:19:26.557] PDF_MONTECARLO_SUCCESS | Monte Carlo chart created from frontend data
+[2026-03-30 00:19:26.741] PDF_GENERATION_SUCCESS | PDF generated successfully
+[2026-03-30 00:20:38.405] ANALYZE_REQUEST_START | text_length=16, currency=CAD
+[2026-03-30 00:20:38.639] PARSING_COMPLETE | portfolio={'AAPL': 100, 'MSFT': 50}
+[2026-03-30 00:20:38.642] METRICS_CALCULATION_START | tickers=['AAPL', 'MSFT']
+[2026-03-30 00:20:39.587] METRICS_CALCULATION_COMPLETE | metrics_available=True
+[2026-03-30 00:20:39.590] SUMMARY_GENERATION_START
+[2026-03-30 00:20:39.594] SUMMARY_GENERATION_COMPLETE | summary_length=672
+[2026-03-30 00:20:39.597] JSON_CONVERSION_START | Converting projection_df
+[2026-03-30 00:20:39.601] JSON_CONVERSION_SUCCESS | projection_df converted, 2 records
+[2026-03-30 00:20:39.605] JSON_CONVERSION_START | Converting correlation_matrix
+[2026-03-30 00:20:39.609] JSON_CONVERSION_SUCCESS | correlation_matrix converted
+[2026-03-30 00:20:39.611] JSON_CONVERSION_START | Converting chart_data
+[2026-03-30 00:20:39.617] JSON_CONVERSION_SUCCESS | chart_data converted, 750 rows
+[2026-03-30 00:20:39.620] RESPONSE_BUILD_START | Building final response
+[2026-03-30 00:20:39.624] RESPONSE_BUILD_START | Building final response
+[2026-03-30 00:20:39.627] RESPONSE_BUILD_SUCCESS | Response ready to return
+[2026-03-30 00:20:39.630] FINAL_RESPONSE | Returning complete analysis with 100174 bytes
+
+================================================================================
+=== Backend Server Started at 2026-03-30 00:20:40.660104 ===
+================================================================================
+[2026-03-30 00:20:40.662] STARTUP | Loading environment and modules
+[2026-03-30 00:20:40.666] STARTUP | Importing logic modules
+[2026-03-30 00:20:41.881] STARTUP | All modules imported successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-30 00:20:42.692419 ===
+================================================================================
+[2026-03-30 00:20:42.695] STARTUP | Loading environment and modules
+[2026-03-30 00:20:42.701] STARTUP | Importing logic modules
+[2026-03-30 00:20:43.954] STARTUP | All modules imported successfully
+[2026-03-30 00:20:45.737] PDF_REQUEST_START | Generating PDF with 2 projections
+[2026-03-30 00:20:45.741] PDF_PROJECTIONS_SUCCESS | Created DataFrame with 2 rows
+[2026-03-30 00:20:46.106] PDF_MONTECARLO_SUCCESS | Monte Carlo chart created from frontend data
+[2026-03-30 00:20:46.288] PDF_GENERATION_SUCCESS | PDF generated successfully
+[2026-03-30 00:22:22.913] PDF_REQUEST_START | Generating PDF with 2 projections
+[2026-03-30 00:22:22.918] PDF_PROJECTIONS_SUCCESS | Created DataFrame with 2 rows
+[2026-03-30 00:22:22.948] PDF_MONTECARLO_SUCCESS | Monte Carlo chart created from frontend data
+[2026-03-30 00:22:23.109] PDF_GENERATION_SUCCESS | PDF generated successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-30 00:42:57.760316 ===
+================================================================================
+[2026-03-30 00:42:57.764] STARTUP | Loading environment and modules
+[2026-03-30 00:42:57.769] STARTUP | Importing logic modules
+[2026-03-30 00:42:59.026] STARTUP | All modules imported successfully
+
+================================================================================
+=== Backend Server Started at 2026-03-30 00:42:59.782431 ===
+================================================================================
+[2026-03-30 00:42:59.786] STARTUP | Loading environment and modules
+[2026-03-30 00:42:59.790] STARTUP | Importing logic modules
+[2026-03-30 00:43:00.990] STARTUP | All modules imported successfully

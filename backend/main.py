@@ -113,6 +113,8 @@ class PDFRequest(BaseModel):
     signals: list = []
     monte_carlo_data: dict = {}
     currency: str = "CAD"
+    mc_years: int = 20
+    mc_withdrawal: float = 0
 
 class SignalsRequest(BaseModel):
     tickers: list[str]
@@ -396,7 +398,9 @@ def generate_pdf(req: PDFRequest):
             correlation_matrix=req.correlation_matrix,
             chart_data=req.chart_data,
             signals=req.signals,
-            currency=req.currency
+            currency=req.currency,
+            mc_years=req.mc_years,
+            mc_withdrawal=req.mc_withdrawal
         )
         
         log_step("PDF_GENERATION_SUCCESS", "PDF generated successfully")
