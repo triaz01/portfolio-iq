@@ -108,7 +108,11 @@ export default function MonteCarlo() {
             min="5"
             max="30"
             value={years}
-            onChange={e => setYears(Number(e.target.value))}
+            onChange={e => {
+              const newYears = Number(e.target.value)
+              setYears(newYears)
+              useAppStore.getState().setMCParams(newYears, withdrawal)
+            }}
             style={{
               width: '100%',
               accentColor: '#1a3d6e'
@@ -130,7 +134,11 @@ export default function MonteCarlo() {
             min="0"
             step="5000"
             value={withdrawal}
-            onChange={e => setWithdrawal(Number(e.target.value))}
+            onChange={e => {
+              const newWithdrawal = Number(e.target.value)
+              setWithdrawal(newWithdrawal)
+              useAppStore.getState().setMCParams(years, newWithdrawal)
+            }}
             style={{
               width: '100%',
               border: '1.5px solid #e2e8f0',

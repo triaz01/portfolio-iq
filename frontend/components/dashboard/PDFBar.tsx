@@ -4,7 +4,7 @@ import { useAppStore } from '@/store/useAppStore'
 import { generatePDF, runMonteCarlo, checkAlignment } from '@/lib/api'
 
 export default function PDFBar() {
-  const { metrics, ipsProfile, ipsTargets, projectionDf, correlationMatrix, chartData, signals, currency } = useAppStore()
+  const { metrics, ipsProfile, ipsTargets, projectionDf, correlationMatrix, chartData, signals, currency, mcYears, mcWithdrawal } = useAppStore()
   const [loading, setLoading] = useState(false)
   const [shouldPulse, setShouldPulse] = useState(false)
   const prevMetricsRef = useRef<any>(null)
@@ -54,7 +54,9 @@ export default function PDFBar() {
         chart_data: chartData,
         signals: signals || [],
         monte_carlo_data: mcResponse.data, // Pass the exact Monte Carlo data
-        currency: currency || 'CAD'
+        currency: currency || 'CAD',
+        mc_years: mcYears,
+        mc_withdrawal: mcWithdrawal
       })
 
       // Create download link

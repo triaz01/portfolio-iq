@@ -10,10 +10,13 @@ interface AppStore {
   signals: object[] | null
   summary: string | null
   currency: string
+  mcYears: number
+  mcWithdrawal: number
   setIPS: (profile: string, targets: object) => void
   setMetrics: (data: any) => void
   setSignals: (signals: object[]) => void
   setCurrency: (c: string) => void
+  setMCParams: (years: number, withdrawal: number) => void
   resetIPS: () => void
 }
 
@@ -27,6 +30,8 @@ export const useAppStore = create<AppStore>((set) => ({
   signals: null,
   summary: null,
   currency: 'CAD',
+  mcYears: 20,
+  mcWithdrawal: 0,
   setIPS: (profile, targets) =>
     set({ ipsProfile: profile, ipsTargets: targets }),
   setMetrics: (data: any) => set({
@@ -38,6 +43,7 @@ export const useAppStore = create<AppStore>((set) => ({
   }),
   setSignals: (signals) => set({ signals }),
   setCurrency: (currency) => set({ currency }),
+  setMCParams: (years, withdrawal) => set({ mcYears: years, mcWithdrawal: withdrawal }),
   resetIPS: () => set({
     ipsProfile: null,
     ipsTargets: null,
