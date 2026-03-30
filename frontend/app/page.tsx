@@ -1,3 +1,4 @@
+'use client'
 import Hero from '@/components/Hero'
 import USPCards from '@/components/USPCards'
 import IPSForm from '@/components/IPSForm'

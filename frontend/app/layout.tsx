@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import NavBar from '@/components/NavBar'
+import NavBarWrapper from '@/components/NavBarWrapper'
 import Providers from '@/components/Providers'
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body style={{ background: '#f8fafc' }}>
         <Providers>
-          <NavBar />
+          <NavBarWrapper />
           <main style={{
             maxWidth: 1200,
             margin: '0 auto',
