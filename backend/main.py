@@ -5,7 +5,7 @@ import logging
 import traceback
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, JSONResponse, ORJSONResponse
+from fastapi.responses import Response, JSONResponse
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -293,7 +293,7 @@ def analyze_portfolio(req: AnalyzeRequest):
         log_step("RESPONSE_BUILD_SUCCESS", "Response ready to return")
         log_step("FINAL_RESPONSE", f"Returning complete analysis with {len(str(response))} bytes")
         
-        return ORJSONResponse(content=response)
+        return JSONResponse(content=response)
     except HTTPException:
         raise
     except Exception as e:
