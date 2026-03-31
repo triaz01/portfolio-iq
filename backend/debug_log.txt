@@ -11944,3 +11944,66 @@
 [2026-03-30 20:20:28.825] PDF_PROJECTIONS_SUCCESS | Created DataFrame with 2 rows
 [2026-03-30 20:20:29.303] PDF_MONTECARLO_SUCCESS | Monte Carlo chart created from frontend data
 [2026-03-30 20:20:29.509] PDF_GENERATION_SUCCESS | PDF generated successfully
+[2026-03-30 20:38:40.545] IPS_REQUEST_START | time_horizon=10, liquidity=Low (< 10%), objective=Capital Preservation
+[2026-03-30 20:38:40.549] IPS_CALCULATION_SUCCESS | profile_type=Moderate, targets_count=5
+[2026-03-30 20:38:50.857] ANALYZE_REQUEST_START | text_length=107, currency=CAD
+[2026-03-30 20:39:00.202] PARSING_COMPLETE | portfolio={'AAUC': 780, 'ARIS': 1000, 'ASE': 8500, 'DOL': 150, 'EDV': 250, 'XIU.TO': 3000, 'MAU.TO': 1500, 'GOOG': 60, 'CI': 25, 'QQQ': 150, 'MU': 50, 'SNDK': 25, 'UPST': 750}
+[2026-03-30 20:39:00.208] METRICS_CALCULATION_START | tickers=['AAUC', 'ARIS', 'ASE', 'DOL', 'EDV', 'XIU.TO', 'MAU.TO', 'GOOG', 'CI', 'QQQ', 'MU', 'SNDK', 'UPST']
+[2026-03-30 20:39:07.286] METRICS_CALCULATION_COMPLETE | metrics_available=True
+[2026-03-30 20:39:07.291] SUMMARY_GENERATION_START
+[2026-03-30 20:39:07.296] SUMMARY_GENERATION_COMPLETE | summary_length=704
+[2026-03-30 20:39:07.299] JSON_CONVERSION_START | Converting projection_df
+[2026-03-30 20:39:07.304] JSON_CONVERSION_SUCCESS | projection_df converted, 13 records
+[2026-03-30 20:39:07.307] JSON_CONVERSION_START | Converting correlation_matrix
+[2026-03-30 20:39:07.310] JSON_CONVERSION_SUCCESS | correlation_matrix converted
+[2026-03-30 20:39:07.313] JSON_CONVERSION_START | Converting chart_data
+[2026-03-30 20:39:07.317] JSON_CONVERSION_SUCCESS | chart_data converted, 266 rows
+[2026-03-30 20:39:07.320] RESPONSE_BUILD_START | Building final response
+[2026-03-30 20:39:07.324] RESPONSE_BUILD_START | Building final response
+[2026-03-30 20:39:07.326] RESPONSE_BUILD_SUCCESS | Response ready to return
+[2026-03-30 20:39:07.329] FINAL_RESPONSE | Returning complete analysis with 44158 bytes
+
+================================================================================
+=== Backend Server Started at 2026-03-30 20:39:51.786508 ===
+================================================================================
+[2026-03-30 20:39:51.792] STARTUP | Loading environment and modules
+[2026-03-30 20:39:51.801] STARTUP | Importing logic modules
+[2026-03-30 20:39:53.164] STARTUP | All modules imported successfully
+[2026-03-30 20:40:11.237] IPS_REQUEST_START | time_horizon=10, liquidity=Low (< 10%), objective=Capital Preservation
+[2026-03-30 20:40:11.241] IPS_CALCULATION_SUCCESS | profile_type=Moderate, targets_count=5
+[2026-03-30 20:40:14.359] ANALYZE_REQUEST_START | text_length=107, currency=CAD
+[2026-03-30 20:40:17.976] PARSING_COMPLETE | portfolio={'AAUC': 780, 'ARIS': 1000, 'ASE': 8500, 'DOL': 150, 'EDV': 250, 'XIU.TO': 3000, 'MAU.TO': 1500, 'GOOG': 60, 'CI': 25, 'QQQ': 150, 'MU': 50, 'SNDK': 25, 'UPST': 750}
+[2026-03-30 20:40:17.979] METRICS_CALCULATION_START | tickers=['AAUC', 'ARIS', 'ASE', 'DOL', 'EDV', 'XIU.TO', 'MAU.TO', 'GOOG', 'CI', 'QQQ', 'MU', 'SNDK', 'UPST']
+[2026-03-30 20:40:25.732] METRICS_CALCULATION_COMPLETE | metrics_available=True
+[2026-03-30 20:40:25.735] SUMMARY_GENERATION_START
+[2026-03-30 20:40:25.739] SUMMARY_GENERATION_COMPLETE | summary_length=731
+[2026-03-30 20:40:25.742] JSON_CONVERSION_START | Converting projection_df
+[2026-03-30 20:40:25.747] JSON_CONVERSION_SUCCESS | projection_df converted, 13 records
+[2026-03-30 20:40:25.749] JSON_CONVERSION_START | Converting correlation_matrix
+[2026-03-30 20:40:25.753] JSON_CONVERSION_SUCCESS | correlation_matrix converted
+[2026-03-30 20:40:25.756] JSON_CONVERSION_START | Converting chart_data
+[2026-03-30 20:40:25.761] JSON_CONVERSION_SUCCESS | chart_data converted, 266 rows
+[2026-03-30 20:40:25.763] RESPONSE_BUILD_START | Building final response
+[2026-03-30 20:40:25.766] RESPONSE_BUILD_START | Building final response
+[2026-03-30 20:40:25.769] RESPONSE_BUILD_SUCCESS | Response ready to return
+[2026-03-30 20:40:25.774] FINAL_RESPONSE | Returning complete analysis with 44213 bytes
+[2026-03-30 20:40:53.536] ANALYZE_REQUEST_START | text_length=9, currency=CAD
+[2026-03-30 20:40:53.659] PARSING_COMPLETE | portfolio={'MSFT': 100}
+[2026-03-30 20:40:53.663] METRICS_CALCULATION_START | tickers=['MSFT']
+[2026-03-30 20:40:54.691] METRICS_CALCULATION_COMPLETE | metrics_available=True
+[2026-03-30 20:40:54.694] SUMMARY_GENERATION_START
+[2026-03-30 20:40:54.698] SUMMARY_GENERATION_COMPLETE | summary_length=713
+[2026-03-30 20:40:54.701] JSON_CONVERSION_START | Converting projection_df
+[2026-03-30 20:40:54.705] JSON_CONVERSION_SUCCESS | projection_df converted, 1 records
+[2026-03-30 20:40:54.708] JSON_CONVERSION_START | Converting correlation_matrix
+[2026-03-30 20:40:54.712] JSON_CONVERSION_SUCCESS | correlation_matrix converted
+[2026-03-30 20:40:54.714] JSON_CONVERSION_START | Converting chart_data
+[2026-03-30 20:40:54.721] JSON_CONVERSION_SUCCESS | chart_data converted, 750 rows
+[2026-03-30 20:40:54.724] RESPONSE_BUILD_START | Building final response
+[2026-03-30 20:40:54.728] RESPONSE_BUILD_START | Building final response
+[2026-03-30 20:40:54.730] RESPONSE_BUILD_SUCCESS | Response ready to return
+[2026-03-30 20:40:54.734] FINAL_RESPONSE | Returning complete analysis with 99885 bytes
+[2026-03-30 20:41:16.546] PDF_REQUEST_START | Generating PDF with 1 projections
+[2026-03-30 20:41:16.550] PDF_PROJECTIONS_SUCCESS | Created DataFrame with 1 rows
+[2026-03-30 20:41:16.982] PDF_MONTECARLO_SUCCESS | Monte Carlo chart created from frontend data
+[2026-03-30 20:41:17.168] PDF_GENERATION_SUCCESS | PDF generated successfully

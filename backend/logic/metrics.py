@@ -110,15 +110,16 @@ def calculate_portfolio_metrics(portfolio, base_currency="CAD"):
                 
                 price_data[ticker] = stock_prices
                 
-                # Safe extraction of dividend yield only (beta will be calculated from portfolio returns)
-                # Critical: Try dividendYield first, then fallback to trailingAnnualDividendYield
-                div_yield = info.get('dividendYield')
+                # Safe extraction of dividend yield as a true decimal (e.g. 0.0102 for 1.02%)
+                # trailingAnnualDividendYield is consistently a decimal (e.g. 0.00975)
+                # dividendYield is returned as a PERCENTAGE by yfinance (e.g. 1.02 for 1.02%) — must divide by 100
+                div_yield = info.get('trailingAnnualDividendYield')
                 if div_yield is None:
-                    div_yield = info.get('trailingAnnualDividendYield', 0.0)
+                    raw = info.get('dividendYield')
+                    div_yield = float(raw) / 100 if raw is not None else 0.0
                 if div_yield is None:
                     div_yield = 0.0
                 
-                # Keep as raw decimal (e.g., 0.05 for 5%)
                 div_yield = float(div_yield)
                 
                 current_price = stock_prices.iloc[-1]
@@ -474,12 +475,13 @@ def generate_investor_summary(metrics):
             volatility_sentence = f"Your portfolio has a beta of {beta:.2f}, meaning it generally moves in tandem with the broader market."
         
         # Sentence 2: Income/Yield
+        dividend_yield_pct = dividend_yield * 100
         if dividend_yield > 0.04:
-            income_sentence = f"With a dividend yield of {dividend_yield:.2f}%, your portfolio generates strong passive income that could provide meaningful cash flow for your investment goals."
+            income_sentence = f"With a dividend yield of {dividend_yield_pct:.2f}%, your portfolio generates strong passive income that could provide meaningful cash flow for your investment goals."
         elif dividend_yield < 0.015:
-            income_sentence = f"At a dividend yield of {dividend_yield:.2f}%, your portfolio is heavily focused on capital appreciation rather than dividend income, prioritizing long-term growth over immediate cash flow."
+            income_sentence = f"At a dividend yield of {dividend_yield_pct:.2f}%, your portfolio is heavily focused on capital appreciation rather than dividend income, prioritizing long-term growth over immediate cash flow."
         else:
-            income_sentence = f"Your portfolio's dividend yield of {dividend_yield:.2f}% provides a moderate balance between income generation and capital appreciation."
+            income_sentence = f"Your portfolio's dividend yield of {dividend_yield_pct:.2f}% provides a moderate balance between income generation and capital appreciation."
         
         # Sentence 3: Stress/Drawdown
         drawdown_percent = abs(max_drawdown) * 100
